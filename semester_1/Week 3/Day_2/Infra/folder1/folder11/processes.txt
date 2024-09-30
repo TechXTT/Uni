@@ -1,0 +1,9 @@
+  PID TTY           TIME CMD
+22696 ttys003    0:00.03 /bin/zsh -il
+33057 ttys005    0:00.13 -zsh
+64429 ttys008    0:00.02 /bin/zsh --login
+64662 ttys010    0:00.02 /bin/zsh --login
+90875 ttys011    0:00.09 /bin/zsh -il
+99078 ttys011    0:00.03 python rich_shield.py
+90959 ttys013    0:00.03 /bin/zsh -i
+91181 ttys015    0:00.03 /bin/zsh -i
