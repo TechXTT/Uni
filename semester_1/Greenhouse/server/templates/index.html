@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Greenhouse Monitoring Dashboard</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid black;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            text-align: left;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Greenhouse Monitoring System</h1>
+
+    <!-- Display Sensor Data in a Table -->
+    <table>
+        <thead>
+            <tr>
+                <th>Sensor ID</th>
+                <th>Timestamp</th>
+                <th>Temperature (℃)</th>
+                <th>Humidity (%)</th>
+                <th>Light Level (W/m²)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for data in sensor_data %}
+            <tr>
+                <td>{{ data.sensor_id }}</td>
+                <td>{{ data.timestamp }}</td>
+                <td>{{ data.temperature }}</td>
+                <td>{{ data.humidity }}</td>
+                <td>{{ data.light_level }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Display the Graph -->
+    <h2>Sensor Data Over Time</h2>
+    <img src="{{ plot_url }}" alt="Sensor Data Graph">
+
+</body>
+
+</html>
