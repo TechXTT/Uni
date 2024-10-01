@@ -27,7 +27,7 @@ def post_data_to_server(data):
     except requests.RequestException as e:
         print("Error posting data to server:", e)
 
-def parseData(data):
+def parse_data(data):
     try:
         json_data = json.loads(data)
         json_data['timestamp'] = datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
