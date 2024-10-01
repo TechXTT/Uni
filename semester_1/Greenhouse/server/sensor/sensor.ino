@@ -2,7 +2,7 @@
 
 // LDR sensor connected to an analog pin
 int LDRPin = A2;  // Pin where the LDR is connected
-int SensorId = 1;
+int SensorId = 2;
 
 void setup() {
   Serial.begin(9600);  // Start serial communication at 9600 baud
