@@ -5,52 +5,166 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Greenhouse Monitoring Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"> <!-- Link to the CSS file -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <h1>Greenhouse Monitoring Dashboard</h1>
+    <header>
+        <h1>Greenhouse Monitoring Dashboard</h1>
+    </header>
 
-    <div class="container">
+    <main class="container">
+        <!-- Section for Multiple Charts -->
+        <section class="chart-section">
+            <h2>Sensor Data Over Time</h2>
+            <div id="chartContainer">
+                <!-- Multiple canvases will be created here for each sensor -->
+            </div>
+        </section>
 
-        <!-- Display Plots for Each Sensor -->
-        <h2>Sensor Data Over Time</h2>
-        <div class="graph-container">
-            {% for sensor_id, plot_url in plot_urls %}
-                <a href="/sensor?id={{ sensor_id }}">
-                    <img src="{{ plot_url }}" alt="Sensor Data Graph">
-                </a>
-            {% endfor %}
-        </div>
-
-        <!-- Display Sensor Data in a Table -->
-        <h2>Sensor Data</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Sensor ID</th>
-                    <th>Timestamp</th>
-                    <th>Temperature (℃)</th>
-                    <th>Humidity (%)</th>
-                    <th>Light Level (W/m²)</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for data in sensor_data %}
-                <tr>
-                    <td>{{ data.sensor_id }}</td>
-                    <td>{{ data.timestamp }}</td>
-                    <td>{{ data.temperature }}</td>
-                    <td>{{ data.humidity }}</td>
-                    <td>{{ data.light_level }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-
-        
-    </div>
+        <!-- Section for Table -->
+        <section class="table-section">
+            <h2>Sensor Data Table</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Sensor ID</th>
+                        <th>Timestamp</th>
+                        <th>Temperature (℃)</th>
+                        <th>Humidity (%)</th>
+                        <th>Light Level (W/m²)</th>
+                    </tr>
+                </thead>
+                <tbody id="sensorTableBody">
+                    <!-- Table rows will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </section>
+    </main>
 
     <footer>
         Greenhouse Monitoring System &copy; 2024
     </footer>
+
+    <script>
+        // Fetch sensor data from the API
+        async function fetchSensorData() {
+            const response = await fetch('/api/sensor_data');
+            const data = await response.json();
+            return data;
+        }
+
+        // Function to group sensor data by sensor_id
+        function groupBySensor(data) {
+            const groupedData = {};
+            data.forEach(entry => {
+                if (!groupedData[entry.sensor_id]) {
+                    groupedData[entry.sensor_id] = [];
+                }
+                groupedData[entry.sensor_id].push(entry);
+            });
+            return groupedData;
+        }
+
+        // Plot each sensor's data in separate charts
+        async function plotSensorData() {
+            const sensorData = await fetchSensorData();
+            const groupedData = groupBySensor(sensorData);
+            const chartContainer = document.getElementById('chartContainer');
+
+            // Clear any existing charts
+            chartContainer.innerHTML = "";
+
+            // Loop through each sensor group and create a canvas for each chart
+            Object.keys(groupedData).forEach(sensorId => {
+                // Create a new canvas element for each sensor
+                const canvas = document.createElement('canvas');
+                canvas.id = `sensorChart_${sensorId}`;
+                canvas.style.marginBottom = "30px";
+                chartContainer.appendChild(canvas);
+
+                // Extract data for charting
+                const sensorSpecificData = groupedData[sensorId];
+                const timestamps = sensorSpecificData.map(data => data.timestamp);
+                const temperatures = sensorSpecificData.map(data => data.temperature);
+                const humidities = sensorSpecificData.map(data => data.humidity);
+                const lightLevels = sensorSpecificData.map(data => data.light_level);
+
+                // Create the chart for this sensor
+                const ctx = canvas.getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: timestamps,
+                        datasets: [
+                            {
+                                label: 'Temperature (℃)',
+                                data: temperatures,
+                                borderColor: 'rgba(255, 99, 132, 1)',
+                                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                fill: true
+                            },
+                            {
+                                label: 'Humidity (%)',
+                                data: humidities,
+                                borderColor: 'rgba(54, 162, 235, 1)',
+                                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                                fill: true
+                            },
+                            {
+                                label: 'Light Level (W/m²)',
+                                data: lightLevels,
+                                borderColor: 'rgba(75, 192, 192, 1)',
+                                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                fill: true
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Timestamp'
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'Value'
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+        }
+
+        // Function to populate the table
+        async function populateSensorTable() {
+            const sensorData = await fetchSensorData();
+            const tableBody = document.getElementById('sensorTableBody');
+            tableBody.innerHTML = ""; // Clear the table body
+
+            // Populate the table rows with sensor data
+            sensorData.forEach(data => {
+                const row = `
+                    <tr>
+                        <td>${data.sensor_id}</td>
+                        <td>${data.timestamp}</td>
+                        <td>${data.temperature}</td>
+                        <td>${data.humidity}</td>
+                        <td>${data.light_level}</td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
+            });
+        }
+
+        // Call the functions to plot sensor data and populate the table
+        plotSensorData();
+        populateSensorTable();
+    </script>
+
 </body>
 </html>
