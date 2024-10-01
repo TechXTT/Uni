@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Greenhouse Monitoring Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"> <!-- Link to the CSS file -->
+    <link rel="stylesheet" href="static/styles.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -46,11 +46,18 @@
     </footer>
 
     <script>
+        let previousSensorData = []; // Store previous data for comparison
+
         // Fetch sensor data from the API
         async function fetchSensorData() {
             const response = await fetch('/api/sensor_data');
             const data = await response.json();
             return data;
+        }
+
+        // Function to check if the new data is different from the previous data
+        function isDataDifferent(newData) {
+            return JSON.stringify(newData) !== JSON.stringify(previousSensorData);
         }
 
         // Function to group sensor data by sensor_id
@@ -68,6 +75,14 @@
         // Plot each sensor's data in separate charts
         async function plotSensorData() {
             const sensorData = await fetchSensorData();
+            
+            if (!isDataDifferent(sensorData)) {
+                // If the data is the same, do nothing
+                return;
+            }
+
+            previousSensorData = sensorData; // Update previous data
+
             const groupedData = groupBySensor(sensorData);
             const chartContainer = document.getElementById('chartContainer');
 
@@ -143,6 +158,12 @@
         // Function to populate the table
         async function populateSensorTable() {
             const sensorData = await fetchSensorData();
+
+            if (!isDataDifferent(sensorData)) {
+                // If the data is the same, do nothing
+                return;
+            }
+
             const tableBody = document.getElementById('sensorTableBody');
             tableBody.innerHTML = ""; // Clear the table body
 
@@ -159,11 +180,20 @@
                 `;
                 tableBody.innerHTML += row;
             });
+
+            // Update previousSensorData
+            previousSensorData = sensorData;
         }
 
-        // Call the functions to plot sensor data and populate the table
-        plotSensorData();
-        populateSensorTable();
+        // Set up a function to automatically refresh the data every 10 seconds
+        function autoRefresh() {
+            plotSensorData();
+            populateSensorTable();
+            setTimeout(autoRefresh, 10000); // Refresh every 10 seconds
+        }
+
+        // Initial load
+        autoRefresh();
     </script>
 
 </body>
