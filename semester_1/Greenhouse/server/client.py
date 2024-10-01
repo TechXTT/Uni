@@ -14,15 +14,7 @@ def get_sensor_data():
 
     data = ser.readline().decode().strip()  # Read the data
     if data:
-        print("Raw data from Arduino:", data)
-        try:
-            # Attempt to load the data as JSON
-            json_data = json.loads(data)
-            json_data['timestamp'] = datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
-            return json_data
-        except json.JSONDecodeError:
-            print("Error decoding JSON:", data)
-            return None
+        return parseData(data)
     else:
         print("No data received from Arduino.")
         return None
@@ -34,6 +26,15 @@ def post_data_to_server(data):
         print("Server response:", response.json())
     except requests.RequestException as e:
         print("Error posting data to server:", e)
+
+def parseData(data):
+    try:
+        json_data = json.loads(data)
+        json_data['timestamp'] = datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
+        return json_data
+    except json.JSONDecodeError:
+        print("Error decoding JSON:", data)
+        return None
 
 if __name__ == '__main__':
     while True:
