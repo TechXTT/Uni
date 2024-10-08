@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Greenhouse Monitoring Dashboard</title>
-    <link rel="stylesheet" href="static/styles.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </head>
 <body>
     <header>
@@ -16,9 +17,18 @@
         <!-- Section for Multiple Charts -->
         <section class="chart-section">
             <h2>Sensor Data Over Time</h2>
-            <div id="chartContainer">
-                <!-- Multiple canvases will be created here for each sensor -->
-            </div>
+            
+            <!-- Temperature Chart -->
+            <h3>Temperature (℃)</h3>
+            <canvas id="temperatureChart" style="margin-bottom: 30px;"></canvas>
+
+            <!-- Humidity Chart -->
+            <h3>Humidity (%)</h3>
+            <canvas id="humidityChart" style="margin-bottom: 30px;"></canvas>
+
+            <!-- Light Level Chart -->
+            <h3>Light Level (W/m²)</h3>
+            <canvas id="lightLevelChart" style="margin-bottom: 30px;"></canvas>
         </section>
 
         <!-- Section for Table -->
@@ -44,157 +54,6 @@
     <footer>
         Greenhouse Monitoring System &copy; 2024
     </footer>
-
-    <script>
-        let previousSensorData = []; // Store previous data for comparison
-
-        // Fetch sensor data from the API
-        async function fetchSensorData() {
-            const response = await fetch('/api/sensor_data');
-            const data = await response.json();
-            return data;
-        }
-
-        // Function to check if the new data is different from the previous data
-        function isDataDifferent(newData) {
-            return JSON.stringify(newData) !== JSON.stringify(previousSensorData);
-        }
-
-        // Function to group sensor data by sensor_id
-        function groupBySensor(data) {
-            const groupedData = {};
-            data.forEach(entry => {
-                if (!groupedData[entry.sensor_id]) {
-                    groupedData[entry.sensor_id] = [];
-                }
-                groupedData[entry.sensor_id].push(entry);
-            });
-            return groupedData;
-        }
-
-        // Plot each sensor's data in separate charts
-        async function plotSensorData() {
-            const sensorData = await fetchSensorData();
-            
-            if (!isDataDifferent(sensorData)) {
-                // If the data is the same, do nothing
-                return;
-            }
-
-            previousSensorData = sensorData; // Update previous data
-
-            const groupedData = groupBySensor(sensorData);
-            const chartContainer = document.getElementById('chartContainer');
-
-            // Clear any existing charts
-            chartContainer.innerHTML = "";
-
-            // Loop through each sensor group and create a canvas for each chart
-            Object.keys(groupedData).forEach(sensorId => {
-                // Create a new canvas element for each sensor
-                const canvas = document.createElement('canvas');
-                canvas.id = `sensorChart_${sensorId}`;
-                canvas.style.marginBottom = "30px";
-                chartContainer.appendChild(canvas);
-
-                // Extract data for charting
-                const sensorSpecificData = groupedData[sensorId];
-                const timestamps = sensorSpecificData.map(data => data.timestamp);
-                const temperatures = sensorSpecificData.map(data => data.temperature);
-                const humidities = sensorSpecificData.map(data => data.humidity);
-                const lightLevels = sensorSpecificData.map(data => data.light_level);
-
-                // Create the chart for this sensor
-                const ctx = canvas.getContext('2d');
-                new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: timestamps,
-                        datasets: [
-                            {
-                                label: 'Temperature (℃)',
-                                data: temperatures,
-                                borderColor: 'rgba(255, 99, 132, 1)',
-                                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                                fill: true
-                            },
-                            {
-                                label: 'Humidity (%)',
-                                data: humidities,
-                                borderColor: 'rgba(54, 162, 235, 1)',
-                                backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                                fill: true
-                            },
-                            {
-                                label: 'Light Level (W/m²)',
-                                data: lightLevels,
-                                borderColor: 'rgba(75, 192, 192, 1)',
-                                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                                fill: true
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        scales: {
-                            x: {
-                                title: {
-                                    display: true,
-                                    text: 'Timestamp'
-                                }
-                            },
-                            y: {
-                                title: {
-                                    display: true,
-                                    text: 'Value'
-                                }
-                            }
-                        }
-                    }
-                });
-            });
-        }
-
-        // Function to populate the table
-        async function populateSensorTable() {
-            const sensorData = await fetchSensorData();
-
-            if (!isDataDifferent(sensorData)) {
-                // If the data is the same, do nothing
-                return;
-            }
-
-            const tableBody = document.getElementById('sensorTableBody');
-            tableBody.innerHTML = ""; // Clear the table body
-
-            // Populate the table rows with sensor data
-            sensorData.forEach(data => {
-                const row = `
-                    <tr>
-                        <td>${data.sensor_id}</td>
-                        <td>${data.timestamp}</td>
-                        <td>${data.temperature}</td>
-                        <td>${data.humidity}</td>
-                        <td>${data.light_level}</td>
-                    </tr>
-                `;
-                tableBody.innerHTML += row;
-            });
-
-            // Update previousSensorData
-            previousSensorData = sensorData;
-        }
-
-        // Set up a function to automatically refresh the data every 10 seconds
-        function autoRefresh() {
-            plotSensorData();
-            populateSensorTable();
-            setTimeout(autoRefresh, 10000); // Refresh every 10 seconds
-        }
-
-        // Initial load
-        autoRefresh();
-    </script>
 
 </body>
 </html>
