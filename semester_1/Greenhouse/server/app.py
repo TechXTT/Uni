@@ -5,6 +5,23 @@ app = Flask(__name__)
 
 DATABASE = 'sensor_data.db'
 
+def init_db():
+    with sqlite3.connect(DATABASE) as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS sensor_data (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                sensor_id TEXT,
+                timestamp TEXT,
+                temperature REAL,
+                humidity REAL,
+                light_level REAL
+            )
+        ''')
+        conn.commit()
+
+init_db()
+
 def get_sensor_data():
     with sqlite3.connect(DATABASE) as conn:
         cursor = conn.cursor()

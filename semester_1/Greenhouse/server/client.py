@@ -7,6 +7,15 @@ import json
 # Configure the serial connection (adjust COM port if needed)
 ser = serial.Serial('/dev/cu.usbserial-1230', 9600, timeout=1)
 
+def parse_data(data):
+    try:
+        json_data = json.loads(data)
+        json_data['timestamp'] = datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
+        return json_data
+    except json.JSONDecodeError:
+        print("Error decoding JSON:", data)
+        return None
+
 def get_sensor_data():
     ser.flushInput()  # Clear the serial input buffer
     ser.write(b'GetSensorData')  # Send command to Arduino
@@ -14,7 +23,7 @@ def get_sensor_data():
 
     data = ser.readline().decode().strip()  # Read the data
     if data:
-        return parseData(data)
+        return parse_data(data)
     else:
         print("No data received from Arduino.")
         return None
@@ -26,15 +35,6 @@ def post_data_to_server(data):
         print("Server response:", response.json())
     except requests.RequestException as e:
         print("Error posting data to server:", e)
-
-def parse_data(data):
-    try:
-        json_data = json.loads(data)
-        json_data['timestamp'] = datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
-        return json_data
-    except json.JSONDecodeError:
-        print("Error decoding JSON:", data)
-        return None
 
 if __name__ == '__main__':
     while True:
