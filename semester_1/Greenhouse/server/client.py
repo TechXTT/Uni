@@ -42,4 +42,4 @@ if __name__ == '__main__':
         if sensor_data:
             print("Sensor Data:", sensor_data)
             post_data_to_server(sensor_data)
-        time.sleep(30)  # Delay for 10 seconds
+        time.sleep(30)  # Delay for 30 seconds
