@@ -1,59 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Greenhouse Monitoring Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Luxon Date Adapter -->
+    <script src="https://cdn.jsdelivr.net/npm/luxon@2.3.2/build/global/luxon.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.1.0"></script>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
-</head>
-<body>
+  </head>
+  <body>
     <header>
-        <h1>Greenhouse Monitoring Dashboard</h1>
+      <h1>Greenhouse Monitoring Dashboard</h1>
     </header>
 
     <main class="container">
-        <!-- Section for Multiple Charts -->
-        <section class="chart-section">
-            <h2>Sensor Data Over Time</h2>
-            
-            <!-- Temperature Chart -->
-            <h3>Temperature (℃)</h3>
-            <canvas id="temperatureChart" style="margin-bottom: 30px;"></canvas>
+      <!-- Section for Multiple Charts -->
+      <section class="chart-section">
+        <h2>Sensor Data Over Time</h2>
 
-            <!-- Humidity Chart -->
-            <h3>Humidity (%)</h3>
-            <canvas id="humidityChart" style="margin-bottom: 30px;"></canvas>
+        <!-- Temperature Chart -->
+        <h3>Temperature (℃)</h3>
+        <canvas id="temperatureChart" style="margin-bottom: 30px"></canvas>
 
-            <!-- Light Level Chart -->
-            <h3>Light Level (W/m²)</h3>
-            <canvas id="lightLevelChart" style="margin-bottom: 30px;"></canvas>
-        </section>
+        <!-- Humidity Chart -->
+        <h3>Humidity (%)</h3>
+        <canvas id="humidityChart" style="margin-bottom: 30px"></canvas>
 
-        <!-- Section for Table -->
-        <section class="table-section">
-            <h2>Sensor Data Table</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Sensor ID</th>
-                        <th>Timestamp</th>
-                        <th>Temperature (℃)</th>
-                        <th>Humidity (%)</th>
-                        <th>Light Level (W/m²)</th>
-                    </tr>
-                </thead>
-                <tbody id="sensorTableBody">
-                    <!-- Table rows will be populated by JavaScript -->
-                </tbody>
-            </table>
-        </section>
+        <!-- Light Level Chart -->
+        <h3>Light Level (W/m²)</h3>
+        <canvas id="lightLevelChart" style="margin-bottom: 30px"></canvas>
+      </section>
+
+      <!-- Section for Table -->
+      <section class="table-section">
+        <h2>Sensor Data Table</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Sensor ID</th>
+              <th>Timestamp</th>
+              <th>Temperature (℃)</th>
+              <th>Humidity (%)</th>
+              <th>Light Level (W/m²)</th>
+            </tr>
+          </thead>
+          <tbody id="sensorTableBody">
+            <!-- Table rows will be populated by JavaScript -->
+          </tbody>
+        </table>
+      </section>
     </main>
 
-    <footer>
-        Greenhouse Monitoring System &copy; 2024
-    </footer>
-
-</body>
+    <footer>Greenhouse Monitoring System &copy; 2024</footer>
+  </body>
 </html>

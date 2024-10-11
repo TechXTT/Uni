@@ -50,7 +50,6 @@ async function plotSensorData() {
     const sensorData = await fetchSensorData();
 
     if (!isDataDifferent(sensorData)) {
-        // If the data is the same, do nothing
         console.log('No new data, skipping chart update');
         return;
     }
@@ -63,56 +62,70 @@ async function plotSensorData() {
     const temperatureDatasets = [];
     const humidityDatasets = [];
     const lightLevelDatasets = [];
-    const timestamps = [...new Set(sensorData.map(data => data.timestamp))]; // Unique timestamps
 
     // Loop through each sensor and create datasets for each graph
     Object.keys(groupedData).forEach((sensorId, index) => {
         const sensorSpecificData = groupedData[sensorId];
-        const temperatures = sensorSpecificData.map(data => data.temperature);
-        const humidities = sensorSpecificData.map(data => data.humidity);
-        const lightLevels = sensorSpecificData.map(data => data.light_level);
+        
         const color = generateColor(index);
 
-        // Temperature dataset for each sensor
+        // Temperature dataset for each sensor with x (timestamps) and y (values)
         temperatureDatasets.push({
             label: `Sensor ${sensorId}`,
-            data: temperatures,
+            data: sensorSpecificData.map(data => ({
+                x: data.timestamp,
+                y: data.temperature
+            })), // Array of {x: timestamp, y: temperature}
             borderColor: color,
             backgroundColor: `${color}33`,
             fill: false
         });
 
-        // Humidity dataset for each sensor
+        // Humidity dataset for each sensor with x (timestamps) and y (values)
         humidityDatasets.push({
             label: `Sensor ${sensorId}`,
-            data: humidities,
+            data: sensorSpecificData.map(data => ({
+                x: data.timestamp,
+                y: data.humidity
+            })), // Array of {x: timestamp, y: humidity}
             borderColor: color,
             backgroundColor: `${color}33`,
             fill: false
         });
 
-        // Light level dataset for each sensor
+        // Light level dataset for each sensor with x (timestamps) and y (values)
         lightLevelDatasets.push({
             label: `Sensor ${sensorId}`,
-            data: lightLevels,
+            data: sensorSpecificData.map(data => ({
+                x: data.timestamp,
+                y: data.light_level
+            })), // Array of {x: timestamp, y: light level}
             borderColor: color,
             backgroundColor: `${color}33`,
             fill: false
         });
     });
 
+    console.log('Temperature data:', temperatureDatasets.map(dataset => dataset.data));
+
     // Create Temperature Chart
     const tempCtx = document.getElementById('temperatureChart').getContext('2d');
     new Chart(tempCtx, {
         type: 'line',
         data: {
-            labels: timestamps,
             datasets: temperatureDatasets
         },
         options: {
             responsive: true,
             scales: {
                 x: {
+                    type: 'time',
+                    time: {
+                        unit: 'minute',
+                        displayFormats: {
+                            minute: 'YYYY-MM-DD HH:mm'
+                        }
+                    },
                     title: {
                         display: true,
                         text: 'Timestamp'
@@ -133,13 +146,19 @@ async function plotSensorData() {
     new Chart(humCtx, {
         type: 'line',
         data: {
-            labels: timestamps,
             datasets: humidityDatasets
         },
         options: {
             responsive: true,
             scales: {
                 x: {
+                    type: 'time',
+                    time: {
+                        unit: 'minute',
+                        displayFormats: {
+                            minute: 'YYYY-MM-DD HH:mm'
+                        }
+                    },
                     title: {
                         display: true,
                         text: 'Timestamp'
@@ -160,13 +179,19 @@ async function plotSensorData() {
     new Chart(lightCtx, {
         type: 'line',
         data: {
-            labels: timestamps,
             datasets: lightLevelDatasets
         },
         options: {
             responsive: true,
             scales: {
                 x: {
+                    type: 'time',
+                    time: {
+                        unit: 'minute',
+                        displayFormats: {
+                            minute: 'YYYY-MM-DD HH:mm'
+                        }
+                    },
                     title: {
                         display: true,
                         text: 'Timestamp'
@@ -188,7 +213,6 @@ async function populateSensorTable(firstLoad) {
     const sensorData = await fetchSensorData();
 
     if (!isDataDifferent(sensorData) && !firstLoad) {
-        // If the data is the same, do nothing
         console.log('No new data, skipping table update');
         return;
     }

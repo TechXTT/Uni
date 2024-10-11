@@ -5,7 +5,7 @@ import time
 import json
 
 # Configure the serial connection (adjust COM port if needed)
-ser = serial.Serial('/dev/cu.usbserial-1230', 9600, timeout=1)
+ser = serial.Serial('/dev/cu.usbserial-1140', 9600, timeout=1)
 
 def parse_data(data):
     try:
@@ -42,4 +42,4 @@ if __name__ == '__main__':
         if sensor_data:
             print("Sensor Data:", sensor_data)
             post_data_to_server(sensor_data)
-        time.sleep(30)  # Delay for 30 seconds
+        time.sleep(10)  # Delay for 10 seconds
