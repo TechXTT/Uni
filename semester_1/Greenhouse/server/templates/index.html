@@ -20,8 +20,18 @@
     <header>
       <h1>Greenhouse Monitoring Dashboard</h1>
     </header>
-
+    
     <main class="container">
+      <!-- Section for Sensor Navigation Buttons -->
+      <section class="sensor-nav">
+        <h2>Select a Sensor</h2>
+        <div class="sensor-buttons">
+            {% for sensor_id in sensor_ids %}
+                <a href="/sensor/{{ sensor_id }}" class="sensor-button">Sensor {{ sensor_id }}</a>
+            {% endfor %}
+        </div>
+    </section>
+    
       <!-- Section for Multiple Charts -->
       <section class="chart-section">
         <h2>Sensor Data Over Time</h2>

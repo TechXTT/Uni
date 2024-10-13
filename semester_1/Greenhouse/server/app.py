@@ -48,10 +48,19 @@ def save_sensor_data(data):
         ''', (data['sensor_id'], data['timestamp'], data['temperature'], data['humidity'], data['light_level']))
         conn.commit()
 
+def get_sensor_ids():
+    with sqlite3.connect(DATABASE) as conn:
+        cursor = conn.cursor()
+        cursor.execute('SELECT DISTINCT sensor_id FROM sensor_data')
+        rows = cursor.fetchall()
+        sensor_ids = [row[0] for row in rows]
+    return sensor_ids
+
 # Route to serve the main dashboard
 @app.route('/')
 def index():
-    return render_template('index.html')
+    sensord_ids = get_sensor_ids()
+    return render_template('index.html', sensor_ids=sensord_ids)
 
 # API endpoint to get sensor data as JSON
 @app.route('/api/sensor_data')
@@ -64,6 +73,44 @@ def post_data():
     data = request.json
     save_sensor_data(data)
     return jsonify({"status": "Data received"}), 200
+
+@app.route('/sensor/<sensor_id>')
+def show_sensor_data(sensor_id):
+    # Get sensor-specific data
+    sensor_data = get_sensor_data_for_sensor(sensor_id)
+    
+    # Prepare data for Chart.js (temperature, humidity, light level, and timestamps)
+    timestamps = [entry['timestamp'] for entry in sensor_data]
+    temperatures = [entry['temperature'] for entry in sensor_data]
+    humidities = [entry['humidity'] for entry in sensor_data]
+    light_levels = [entry['light_level'] for entry in sensor_data]
+
+    return render_template('sensor_page.html', 
+                           sensor_id=sensor_id, 
+                           sensor_data=sensor_data,
+                           timestamps=timestamps,
+                           temperatures=temperatures,
+                           humidities=humidities,
+                           light_levels=light_levels)
+
+# Function to filter data for a specific sensor
+def get_sensor_data_for_sensor(sensor_id):
+    # This function would filter your data and return only the entries for this specific sensor
+    with sqlite3.connect(DATABASE) as conn:
+        cursor = conn.cursor()
+        cursor.execute('SELECT sensor_id, timestamp, temperature, humidity, light_level FROM sensor_data WHERE sensor_id=?', (sensor_id,))
+        rows = cursor.fetchall()
+        sensor_data = [
+            {
+                "sensor_id": row[0],
+                "timestamp": row[1],
+                "temperature": row[2],
+                "humidity": row[3],
+                "light_level": row[4]
+            }
+            for row in rows
+        ]
+    return sensor_data
 
 
 if __name__ == '__main__':
